@@ -1,4 +1,0 @@
-﻿  SDLab3.cpp
-C:\Users\Cata\source\repos\SDLab3\SDLab3\SDLab3.cpp(19,41): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Cata\source\repos\SDLab3\SDLab3\SDLab3.cpp(26,25): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  SDLab3.vcxproj -> C:\Users\Cata\source\repos\SDLab3\x64\Debug\SDLab3.exe
