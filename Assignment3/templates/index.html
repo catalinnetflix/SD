@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading System</title>
+</head>
+<body>
+    <h1>Trading System</h1>
+
+    <h2>Users & Balances</h2>
+    <ul>
+        {% for user, balance in balances.items() %}
+            <li><strong>{{ user }}</strong>: ${{ balance }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Active Orders</h2>
+    <ul>
+        {% for symbol, order_list in orders.items() %}
+             <h3>{{ symbol }}</h3>
+             {% for order in order_list %}
+                <li>
+                    {{ order.side | upper }} {{ order.quantity }} @ ${{ order.price }}
+                    (User: {{ order.user_id }}, ID: {{ order.order_id }})
+                </li>
+             {% endfor %}
+        {% endfor %}
+    </ul>
+
+    <h2>Create User (Credit Funds)</h2>
+    <form action="/credit" method="post">
+        User ID: <input type="text" name="user_id" required>
+        Amount: <input type="number" name="amount" required>
+        <button type="submit">Credit</button>
+    </form>
+
+    <h2>Place Order</h2>
+    <form action="/place_order" method="post">
+        User ID: <input type="text" name="user_id" required><br>
+        Side:
+        <select name="side">
+            <option value="buy">BUY</option>
+            <option value="sell">SELL</option>
+        </select><br>
+        Quantity: <input type="number" name="quantity" required><br>
+        Price: <input type="number" name="price" required><br>
+        Share Symbol:
+        <select name="symbol">
+            {% for symbol in symbols %}
+                <option value="{{ symbol }}">{{ symbol }}</option>
+            {% endfor %}
+        </select><br>
+        <button type="submit">Place Order</button>
+    </form>
+
+    <h2>Cancel Order</h2>
+    <form action="/cancel_order" method="post">
+        Order ID: <input type="text" name="order_id" required>
+        <button type="submit">Cancel Order</button>
+    </form>
+
+    <h2>Execute Trade</h2>
+    <form action="/execute_trade" method="post">
+        Buyer:
+        <select name="buyer_id">
+            {% for user in users %}
+                <option value="{{ user }}">{{ user }}</option>
+            {% endfor %}
+        </select><br>
+        Seller:
+        <select name="seller_id">
+            {% for user in users %}
+                <option value="{{ user }}">{{ user }}</option>
+            {% endfor %}
+        </select><br>
+        Share Symbol:
+        <select name="symbol">
+            {% for symbol in symbols %}
+                <option value="{{ symbol }}">{{ symbol }}</option>
+            {% endfor %}
+        </select><br>
+        Quantity: <input type="number" name="quantity" required><br>
+        Price: <input type="number" name="price" required><br>
+        <button type="submit">Execute Trade</button>
+    </form>
+</body>
+</html>
