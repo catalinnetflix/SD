@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Search Web App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+    <a class="navbar-brand" href="#">File Search Web App</a>
+    <div class="ms-auto">
+        <button class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#historyModal">History</button>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Index Files Button -->
+    <div class="mb-3">
+        <button id="index-btn" class="btn btn-outline-primary">Index Files</button>
+        <span id="index-status" class="ms-2 text-success"></span>
+    </div>
+
+    <!-- Search Form -->
+    <form method="POST" class="input-group mb-3">
+        <input type="text" class="form-control" name="query" placeholder="Search your files and code..." value="{{ original_query }}" required>
+        <select class="form-select d-inline w-auto" name="report_type" style="max-width: 140px;">
+            <option value="summary" {% if report_type=='summary' %}selected{% endif %}>Summary</option>
+            <option value="detailed" {% if report_type=='detailed' %}selected{% endif %}>Detailed</option>
+        </select>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+
+    {% if corrected and corrected != original_query %}
+        <div class="alert alert-warning">
+            Spelling autocorrected: Searched for "<strong>{{ corrected }}</strong>"
+        </div>
+    {% endif %}
+    {% if cache_status %}
+    <div class="alert alert-info">
+        {{ cache_status }}
+    </div>
+{% endif %}
+
+
+
+ {% if widget == "calculator" %}
+<div class="mb-3 p-3 border rounded bg-light" style="max-width:320px;">
+    <h5>Calculator</h5>
+    <iframe src="https://www.calculator.net/"
+            width="320" height="390"
+            style="border:none;overflow:hidden;"
+            scrolling="no">
+    </iframe>
+</div>
+{% endif %}
+
+
+
+    {% if widget == "calendar" %}
+    <div class="mb-3 p-3 border rounded bg-light" style="max-width:320px;">
+        <h5>Calendar</h5>
+        <iframe src="https://calendar.google.com/calendar/embed?src=en.romanian%23holiday%40group.v.calendar.google.com&ctz=Europe%2FBucharest"
+                style="border: 0" width="320" height="250" frameborder="0" scrolling="no"></iframe>
+    </div>
+    {% endif %}
+
+    {% if widget == "weather" %}
+<div class="mb-3 p-3 border rounded bg-light" style="max-width:350px;">
+    <h5>Weather</h5>
+    <a class="weatherwidget-io"
+       href="https://forecast7.com/ro/46d7723d62/cluj-napoca/"
+       data-label_1="CLUJ" data-label_2="WEATHER"
+       data-theme="original" >CLUJ WEATHER</a>
+</div>
+
+
+<script>
+if(!window.weatherWidgetScriptLoaded) {
+    window.weatherWidgetScriptLoaded = true;
+    var js = document.createElement('script');
+    js.src = 'https://weatherwidget.io/js/widget.min.js';
+    document.body.appendChild(js);
+}
+</script>
+{% endif %}
+
+
+{% if widget == "clock" %}
+<div class="mb-3 p-3 border rounded bg-light" style="max-width:320px;">
+    <h5>Clock</h5>
+    <iframe src="https://free.timeanddate.com/clock/i95vqbrq/n136/tlro16/fn2/fs20/fcfff/tc000/pcfff/tt0/th2" frameborder="0" width="120" height="60"></iframe>
+</div>
+{% endif %}
+
+
+    <!-- Metadata Summary -->
+    {% if metadata.file_types or metadata.years or metadata.languages %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Metadata Summary</div>
+                <div class="card-body">
+                    <b>File Types:</b>
+                    {% for k,v in metadata.file_types.items() %}
+                        <span class="badge bg-info text-dark">{{ k }} ({{ v }})</span>
+                    {% endfor %}
+                    <br>
+                    <b>Modified Years:</b>
+                    {% for k,v in metadata.years.items() %}
+                        <span class="badge bg-secondary">{{ k }} ({{ v }})</span>
+                    {% endfor %}
+                    <br>
+                    <b>Languages:</b>
+                    {% for k,v in metadata.languages.items() %}
+                        <span class="badge bg-success">{{ k }} ({{ v }})</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search Results -->
+    <div>
+        <h5>Results</h5>
+        {% if results %}
+            <ul class="list-group">
+            {% for r in results %}
+                <li class="list-group-item">
+                    <b>{{ r.filename }}</b>
+                    <br>
+                    {% if report_type == "detailed" %}
+                        <pre class="mt-1">{{ r.detail }}</pre>
+                    {% else %}
+                        <span>{{ r.summary }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-muted">No results.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="historyModalLabel">Search History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="history-list" class="list-group">
+    {% for term, count in history[::-1] %}
+    <li class="list-group-item">
+        {{ term }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+    </li>
+    {% endfor %}
+
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.getElementById('index-btn').onclick = function() {
+    document.getElementById('index-status').textContent = "Indexing...";
+    fetch("/index-files", {method: "POST"})
+      .then(resp => resp.json())
+      .then(data => {
+          document.getElementById('index-status').textContent = data.message;
+          setTimeout(() => { document.getElementById('index-status').textContent = ""; }, 4000);
+      })
+      .catch(() => {
+          document.getElementById('index-status').textContent = "Failed to index!";
+      });
+}
+</script>
+
+</body>
+</html>
